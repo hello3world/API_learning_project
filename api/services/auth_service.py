@@ -263,3 +263,18 @@ class AuthService:
             return None
 
         return user
+
+    @staticmethod
+    async def delete_user(
+        db: AsyncSession,
+        user: User,
+    ) -> None:
+        """
+        Delete a user from the database.
+
+        Args:
+            db: Database session.
+            user: User to delete.
+        """
+        await db.delete(user)
+        await db.flush()
