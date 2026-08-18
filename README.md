@@ -2,6 +2,17 @@
 
 A learning project for practicing **httpx** API testing with FastAPI.
 
+## About This Project
+
+This is an educational API created with AI assistance specifically designed for practicing and mastering REST API automation testing. The project serves as a sandbox environment for:
+
+- Testing and validating pet projects related to API automation
+- Reinforcing theoretical knowledge of REST API concepts
+- Practicing various HTTP methods, authentication patterns, and testing strategies
+- Experimenting with modern API development tools and frameworks
+
+Feel free to use this project as a reference, template, or learning resource for your own API automation journey!
+
 
 ## Features
 
@@ -305,4 +316,15 @@ lsof -i :5433
 # Then either stop that service or change the port in docker-compose.yml
 # and update DATABASE_URL in api/config.py accordingly
 ```
+
+## License
+
+This project is open source and available under the **MIT License**. You are free to use, modify, distribute, and adapt this project for your own learning, pet projects, or educational purposes.
+
+See the [LICENSE](LICENSE) file for full details.
+
+---
+
+**Created with ❤️ for the API automation testing community**
+
 # API_learning_project
