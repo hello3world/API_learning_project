@@ -16,13 +16,13 @@ from api.models.farm import FarmStatus
 class FarmCreate(BaseModel):
     """
     Schema for creating a new mining farm.
-    
+
     **Request Body:**
     - `name` (str, required): Farm display name. 1-100 characters.
     - `location` (str, optional): Physical location description.
     - `total_power_kw` (float, optional): Total available power in kilowatts. Must be > 0.
     - `status` (str, optional): Initial status. One of: online, offline, maintenance. Default: offline.
-    
+
     **Response 201:** FarmResponse - newly created farm object.
     **Response 400:** Name already exists for this owner.
     **Response 401:** Missing or invalid authentication cookie.
@@ -57,15 +57,15 @@ class FarmCreate(BaseModel):
 class FarmUpdate(BaseModel):
     """
     Schema for full farm update (PUT).
-    
+
     All fields are required for full replacement.
-    
+
     **Request Body:**
     - `name` (str, required): Farm display name. 1-100 characters.
     - `location` (str, optional): Physical location description.
     - `total_power_kw` (float, optional): Total available power in kilowatts.
     - `status` (str, required): Status. One of: online, offline, maintenance.
-    
+
     **Response 200:** FarmResponse - updated farm object.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -97,15 +97,15 @@ class FarmUpdate(BaseModel):
 class FarmPatch(BaseModel):
     """
     Schema for partial farm update (PATCH).
-    
+
     All fields are optional - only provided fields are updated.
-    
+
     **Request Body:**
     - `name` (str, optional): Farm display name. 1-100 characters.
     - `location` (str, optional): Physical location description.
     - `total_power_kw` (float, optional): Total available power in kilowatts.
     - `status` (str, optional): Status. One of: online, offline, maintenance.
-    
+
     **Response 200:** FarmResponse - updated farm object.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -137,7 +137,7 @@ class FarmPatch(BaseModel):
 class FarmResponse(BaseModel):
     """
     Schema for farm response.
-    
+
     **Fields:**
     - `id` (UUID): Farm unique identifier.
     - `name` (str): Farm display name.
@@ -153,19 +153,24 @@ class FarmResponse(BaseModel):
     name: str = Field(..., description="Farm display name.")
     location: Optional[str] = Field(None, description="Physical location.")
     owner_id: UUID = Field(..., description="Owner user ID.")
-    total_power_kw: Optional[float] = Field(None, description="Total power capacity in kW.")
-    status: FarmStatus = Field(..., description="Operational status.")
-    created_at: datetime = Field(..., description="Creation timestamp.")
-    updated_at: datetime = Field(..., description="Last update timestamp.")
-    miners_count: int = Field(default=0, description="Number of miners in the farm.")
-    
+    total_power_kw: Optional[float] = Field(
+        None, description="Total power capacity in kW.")
+    status: FarmStatus = Field(
+        ..., description="Operational status. Possible values: online, offline, maintenance.")
+    created_at: datetime = Field(...,
+                                 description="Creation timestamp in ISO 8601 format.")
+    updated_at: datetime = Field(...,
+                                 description="Last update timestamp in ISO 8601 format.")
+    miners_count: int = Field(
+        default=0, description="Number of miners in the farm.")
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class FarmListResponse(BaseModel):
     """
     Schema for paginated farm list response.
-    
+
     **Fields:**
     - `items` (list): List of farms.
     - `total` (int): Total number of farms.
@@ -183,7 +188,7 @@ class FarmListResponse(BaseModel):
 class FarmSummary(BaseModel):
     """
     Schema for farm summary/aggregated statistics.
-    
+
     **Fields:**
     - `farm_id` (UUID): Farm identifier.
     - `total_hashrate_th` (float): Total hashrate in TH/s.
@@ -193,8 +198,11 @@ class FarmSummary(BaseModel):
     - `avg_temperature_c` (float): Average temperature in Celsius.
     """
     farm_id: UUID = Field(..., description="Farm identifier.")
-    total_hashrate_th: float = Field(..., description="Total hashrate in TH/s.")
+    total_hashrate_th: float = Field(...,
+                                     description="Total hashrate in TH/s.")
     active_miners: int = Field(..., description="Number of active miners.")
     total_miners: int = Field(..., description="Total number of miners.")
-    total_power_watts: float = Field(..., description="Total power consumption in Watts.")
-    avg_temperature_c: float = Field(..., description="Average temperature in Celsius.")
+    total_power_watts: float = Field(...,
+                                     description="Total power consumption in Watts.")
+    avg_temperature_c: float = Field(...,
+                                     description="Average temperature in Celsius.")

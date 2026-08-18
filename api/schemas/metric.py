@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class MetricCreate(BaseModel):
     """
     Schema for creating a new miner metric snapshot.
-    
+
     **Request Body:**
     - `hashrate_th` (float, required): Hashrate in Terahash/second. Must be >= 0.
     - `temperature_c` (float, required): Temperature in Celsius.
@@ -23,7 +23,7 @@ class MetricCreate(BaseModel):
     - `accepted_shares` (int, optional): Number of accepted shares. Default: 0.
     - `rejected_shares` (int, optional): Number of rejected shares. Default: 0.
     - `pool_difficulty` (float, optional): Current pool difficulty.
-    
+
     **Response 201:** MetricResponse - newly created metric snapshot.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -76,7 +76,7 @@ class MetricCreate(BaseModel):
 class MetricResponse(BaseModel):
     """
     Schema for metric response.
-    
+
     **Fields:**
     - `id` (UUID): Metric unique identifier.
     - `miner_id` (UUID): Parent miner ID.
@@ -91,22 +91,29 @@ class MetricResponse(BaseModel):
     """
     id: UUID = Field(..., description="Metric unique identifier.")
     miner_id: UUID = Field(..., description="Parent miner ID.")
-    recorded_at: datetime = Field(..., description="When the metric was recorded.")
-    hashrate_th: float = Field(..., description="Hashrate in TH/s.")
+    recorded_at: datetime = Field(
+        ..., description="When the metric was recorded in ISO 8601 format.")
+    hashrate_th: float = Field(...,
+                               description="Hashrate in TH/s. Must be >= 0.")
     temperature_c: float = Field(..., description="Temperature in Celsius.")
-    fan_speed_rpm: Optional[int] = Field(None, description="Fan speed in RPM.")
-    power_watts: float = Field(..., description="Power consumption in Watts.")
-    accepted_shares: int = Field(..., description="Accepted shares count.")
-    rejected_shares: int = Field(..., description="Rejected shares count.")
-    pool_difficulty: Optional[float] = Field(None, description="Pool difficulty.")
-    
+    fan_speed_rpm: Optional[int] = Field(
+        None, description="Fan speed in RPM. Must be >= 0.")
+    power_watts: float = Field(...,
+                               description="Power consumption in Watts. Must be >= 0.")
+    accepted_shares: int = Field(...,
+                                 description="Accepted shares count. Must be >= 0.")
+    rejected_shares: int = Field(...,
+                                 description="Rejected shares count. Must be >= 0.")
+    pool_difficulty: Optional[float] = Field(
+        None, description="Pool difficulty. Must be >= 0.")
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class MetricListResponse(BaseModel):
     """
     Schema for paginated metric list response.
-    
+
     **Fields:**
     - `items` (list): List of metrics.
     - `total` (int): Total number of metrics.
@@ -124,12 +131,13 @@ class MetricListResponse(BaseModel):
 class MetricLatestResponse(BaseModel):
     """
     Schema for latest metric response with miner info.
-    
+
     **Fields:**
     - `metric` (MetricResponse | null): Latest metric or null if no metrics.
     - `miner_id` (UUID): Miner ID.
     - `miner_name` (str): Miner display name.
     """
-    metric: Optional[MetricResponse] = Field(None, description="Latest metric or null.")
+    metric: Optional[MetricResponse] = Field(
+        None, description="Latest metric or null.")
     miner_id: UUID = Field(..., description="Miner ID.")
     miner_name: str = Field(..., description="Miner display name.")

@@ -16,7 +16,7 @@ from api.models.miner import MinerStatus
 class MinerCreate(BaseModel):
     """
     Schema for creating a new miner.
-    
+
     **Request Body:**
     - `name` (str, required): Miner display name. 1-100 characters.
     - `model` (str, required): Hardware model (e.g., "Antminer S19 Pro"). 1-100 characters.
@@ -24,7 +24,7 @@ class MinerCreate(BaseModel):
     - `mac_address` (str, optional): Network MAC address (XX:XX:XX:XX:XX:XX format).
     - `status` (str, optional): Initial status. One of: active, inactive, error, maintenance. Default: inactive.
     - `worker_name` (str, optional): Pool worker identifier.
-    
+
     **Response 201:** MinerResponse - newly created miner object.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -74,9 +74,9 @@ class MinerCreate(BaseModel):
 class MinerUpdate(BaseModel):
     """
     Schema for full miner update (PUT).
-    
+
     All fields are required for full replacement.
-    
+
     **Request Body:**
     - `name` (str, required): Miner display name. 1-100 characters.
     - `model` (str, required): Hardware model. 1-100 characters.
@@ -84,7 +84,7 @@ class MinerUpdate(BaseModel):
     - `mac_address` (str, optional): Network MAC address.
     - `status` (str, required): Status. One of: active, inactive, error, maintenance.
     - `worker_name` (str, optional): Pool worker identifier.
-    
+
     **Response 200:** MinerResponse - updated miner object.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -129,9 +129,9 @@ class MinerUpdate(BaseModel):
 class MinerPatch(BaseModel):
     """
     Schema for partial miner update (PATCH).
-    
+
     All fields are optional - only provided fields are updated.
-    
+
     **Request Body:**
     - `name` (str, optional): Miner display name. 1-100 characters.
     - `model` (str, optional): Hardware model.
@@ -139,7 +139,7 @@ class MinerPatch(BaseModel):
     - `mac_address` (str, optional): Network MAC address.
     - `status` (str, optional): Status. One of: active, inactive, error, maintenance.
     - `worker_name` (str, optional): Pool worker identifier.
-    
+
     **Response 200:** MinerResponse - updated miner object.
     **Response 401:** Missing or invalid authentication cookie.
     **Response 403:** User does not have operator or admin role.
@@ -183,7 +183,7 @@ class MinerPatch(BaseModel):
 class MinerResponse(BaseModel):
     """
     Schema for miner response.
-    
+
     **Fields:**
     - `id` (UUID): Miner unique identifier.
     - `farm_id` (UUID): Parent farm ID.
@@ -201,19 +201,24 @@ class MinerResponse(BaseModel):
     name: str = Field(..., description="Miner display name.")
     model: str = Field(..., description="Hardware model.")
     ip_address: Optional[str] = Field(None, description="Network IP address.")
-    mac_address: Optional[str] = Field(None, description="Network MAC address.")
-    status: MinerStatus = Field(..., description="Operational status.")
-    worker_name: Optional[str] = Field(None, description="Pool worker identifier.")
-    created_at: datetime = Field(..., description="Registration timestamp.")
-    updated_at: datetime = Field(..., description="Last update timestamp.")
-    
+    mac_address: Optional[str] = Field(
+        None, description="Network MAC address.")
+    status: MinerStatus = Field(
+        ..., description="Operational status. Possible values: active, inactive, error, maintenance.")
+    worker_name: Optional[str] = Field(
+        None, description="Pool worker identifier.")
+    created_at: datetime = Field(...,
+                                 description="Registration timestamp in ISO 8601 format.")
+    updated_at: datetime = Field(...,
+                                 description="Last update timestamp in ISO 8601 format.")
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class MinerListResponse(BaseModel):
     """
     Schema for paginated miner list response.
-    
+
     **Fields:**
     - `items` (list): List of miners.
     - `total` (int): Total number of miners.

@@ -16,12 +16,12 @@ from api.models.user import UserRole
 class UserCreate(BaseModel):
     """
     Schema for user registration.
-    
+
     **Fields:**
     - `username` (str, required): Unique username. 3-50 characters.
     - `email` (str, required): Valid email address.
     - `password` (str, required): Password. 8-100 characters.
-    - `role` (str, optional): User role. Default: "viewer".
+    - `role` (str, optional): User role. Possible values: admin, operator, viewer. Default: "viewer".
     """
     username: str = Field(
         ...,
@@ -51,7 +51,7 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     """
     Schema for user login.
-    
+
     **Fields:**
     - `username` (str, required): Username or email.
     - `password` (str, required): User password.
@@ -71,7 +71,7 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     """
     Schema for updating user profile.
-    
+
     **Fields:**
     - `email` (str, optional): New email address.
     - `password` (str, optional): New password. 8-100 characters.
@@ -91,7 +91,7 @@ class UserUpdate(BaseModel):
 class UserResponse(BaseModel):
     """
     Schema for user response.
-    
+
     **Fields:**
     - `id` (UUID): User unique identifier.
     - `username` (str): Username.
@@ -103,17 +103,20 @@ class UserResponse(BaseModel):
     id: UUID = Field(..., description="User unique identifier.")
     username: str = Field(..., description="Username.")
     email: str = Field(..., description="Email address.")
-    is_active: bool = Field(..., description="Whether user is active.")
-    role: UserRole = Field(..., description="User role.")
-    created_at: datetime = Field(..., description="Account creation timestamp.")
-    
+    is_active: bool = Field(...,
+                            description="Whether user is active. True or False.")
+    role: UserRole = Field(...,
+                           description="User role. Possible values: admin, operator, viewer.")
+    created_at: datetime = Field(...,
+                                 description="Account creation timestamp in ISO 8601 format.")
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class TokenData(BaseModel):
     """
     Schema for JWT token data (internal use).
-    
+
     **Fields:**
     - `user_id` (UUID): User identifier from token.
     - `username` (str): Username from token.
@@ -127,10 +130,11 @@ class TokenData(BaseModel):
 class LoginResponse(BaseModel):
     """
     Schema for successful login response.
-    
+
     **Fields:**
     - `message` (str): Success message.
     - `user` (UserResponse): User details.
     """
-    message: str = Field(default="Login successful", description="Success message.")
+    message: str = Field(default="Login successful",
+                         description="Success message.")
     user: UserResponse = Field(..., description="User details.")
