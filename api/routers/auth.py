@@ -21,7 +21,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Register a new user",
+    summary="POST /api/v1/auth/register - Register a new user",
     responses={
         201: {"description": "User created successfully"},
         409: {"description": "Username or email already exists"},
@@ -62,7 +62,7 @@ async def register(
 @router.post(
     "/login",
     response_model=LoginResponse,
-    summary="Login and get JWT cookie",
+    summary="POST /api/v1/auth/login - Login and get JWT cookie",
     responses={
         200: {"description": "Login successful, JWT cookie set"},
         401: {"description": "Invalid credentials"},
@@ -121,7 +121,7 @@ async def login(
 @router.post(
     "/logout",
     status_code=status.HTTP_200_OK,
-    summary="Logout and clear JWT cookie",
+    summary="POST /api/v1/auth/logout - Logout and clear JWT cookie",
     responses={
         200: {"description": "Logout successful, cookie cleared"},
         401: {"description": "Not authenticated"},
@@ -150,7 +150,7 @@ async def logout(
 @router.get(
     "/me",
     response_model=UserResponse,
-    summary="Get current user profile",
+    summary="GET /api/v1/auth/me - Get current user profile",
     responses={
         200: {"description": "Current user profile"},
         401: {"description": "Not authenticated"},
@@ -171,7 +171,7 @@ async def get_me(
 @router.patch(
     "/me",
     response_model=UserResponse,
-    summary="Update current user profile",
+    summary="PATCH /api/v1/auth/me - Update current user profile",
     responses={
         200: {"description": "Profile updated successfully"},
         401: {"description": "Not authenticated"},
@@ -217,7 +217,7 @@ async def update_me(
 @router.delete(
     "/users/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete user by ID",
+    summary="DELETE /api/v1/auth/users/{user_id} - Delete user by ID",
     responses={
         204: {"description": "User deleted successfully"},
         401: {"description": "Not authenticated"},
@@ -233,40 +233,40 @@ async def delete_user(
 ) -> None:
     """
     Delete a user by their ID.
-    
+
     **Path Parameters:**
     - `user_id` (str): The UUID of the user to delete.
-    
+
     **Response 204:** User deleted successfully (no content).
     **Response 401:** Not authenticated (no valid cookie).
     **Response 403:** Not authorized (can only delete own account or must be admin).
     **Response 404:** User not found.
-    
+
     Users can delete their own accounts. Only admins can delete other users' accounts.
     If deleting own account, the JWT cookie will also be cleared.
     """
     from uuid import UUID
-    
+
     # Convert user_id to UUID
     try:
         user_uuid = UUID(user_id)
     except ValueError:
         raise BadRequestException("Invalid user ID format")
-    
+
     # Get the user to delete
     user_to_delete = await AuthService.get_user_by_id(db, user_uuid)
     if not user_to_delete:
         from api.exceptions import NotFoundException
         raise NotFoundException(f"User with ID '{user_id}' not found")
-    
+
     # Check authorization: users can delete themselves, admins can delete anyone
     from api.models.user import UserRole
     if current_user.id != user_uuid and current_user.role != UserRole.ADMIN:
         from api.exceptions import ForbiddenException
         raise ForbiddenException("You can only delete your own account")
-    
+
     await AuthService.delete_user(db, user_to_delete)
-    
+
     # If deleting own account, clear the JWT cookie
     if current_user.id == user_uuid:
         response.delete_cookie(

@@ -29,7 +29,7 @@ router = APIRouter(tags=["Miners"])
 @router.get(
     "/farms/{farm_id}/miners",
     response_model=MinerListResponse,
-    summary="List miners in a farm",
+    summary="GET /api/v1/farms/{farm_id}/miners - List miners in a farm",
     responses={
         200: {"description": "List of miners"},
         401: {"description": "Not authenticated"},
@@ -49,15 +49,15 @@ async def list_miners(
 ) -> MinerListResponse:
     """
     Get a paginated list of miners in a farm.
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
-    
+
     **Query Parameters:**
     - `page` (int, optional): Page number (1-indexed). Default: 1.
     - `size` (int, optional): Page size (1-100). Default: 10.
     - `status` (str, optional): Filter by status (active, inactive, error, maintenance).
-    
+
     **Response 200:** Paginated list of miners.
     **Response 401:** Not authenticated.
     **Response 404:** Farm not found.
@@ -66,7 +66,7 @@ async def list_miners(
     farm = await FarmService.get_farm_by_id(db, farm_id)
     if farm is None:
         raise NotFoundException("Farm", str(farm_id))
-    
+
     miners, total = await MinerService.get_miners(
         db=db,
         farm_id=farm_id,
@@ -74,7 +74,7 @@ async def list_miners(
         page=pagination.page,
         size=pagination.size,
     )
-    
+
     return MinerListResponse(
         items=[MinerResponse.model_validate(m) for m in miners],
         total=total,
@@ -88,7 +88,7 @@ async def list_miners(
     "/farms/{farm_id}/miners",
     response_model=MinerResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Add a miner to a farm",
+    summary="POST /api/v1/farms/{farm_id}/miners - Add a miner to a farm",
     responses={
         201: {"description": "Miner created successfully"},
         401: {"description": "Not authenticated"},
@@ -106,10 +106,10 @@ async def create_miner(
 ) -> MinerResponse:
     """
     Add a new miner to a farm.
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
-    
+
     **Request Body:**
     - `name` (str, required): Miner display name. 1-100 characters.
     - `model` (str, required): Hardware model (e.g., "Antminer S19 Pro").
@@ -117,7 +117,7 @@ async def create_miner(
     - `mac_address` (str, optional): Network MAC address (XX:XX:XX:XX:XX:XX).
     - `status` (str, optional): Initial status. Default: inactive.
     - `worker_name` (str, optional): Pool worker identifier.
-    
+
     **Response 201:** Miner created successfully.
     **Response 401:** Not authenticated.
     **Response 403:** User does not have operator or admin role.
@@ -129,14 +129,14 @@ async def create_miner(
     farm = await FarmService.get_farm_by_id(db, farm_id)
     if farm is None:
         raise NotFoundException("Farm", str(farm_id))
-    
+
     # Check for duplicate IP
     if miner_data.ip_address:
         if await MinerService.check_ip_exists(db, farm_id, miner_data.ip_address):
             raise ConflictException(
                 f"IP address '{miner_data.ip_address}' already exists in this farm"
             )
-    
+
     miner = await MinerService.create_miner(db, farm_id, miner_data)
     return MinerResponse.model_validate(miner)
 
@@ -144,7 +144,7 @@ async def create_miner(
 @router.get(
     "/farms/{farm_id}/miners/{miner_id}",
     response_model=MinerResponse,
-    summary="Get a miner by ID",
+    summary="GET /api/v1/farms/{farm_id}/miners/{miner_id} - Get a miner by ID",
     responses={
         200: {"description": "Miner details"},
         401: {"description": "Not authenticated"},
@@ -159,27 +159,27 @@ async def get_miner(
 ) -> MinerResponse:
     """
     Get details of a specific miner.
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
     - `miner_id` (UUID, required): Miner unique identifier.
-    
+
     **Response 200:** Miner details.
     **Response 401:** Not authenticated.
     **Response 404:** Farm or miner not found.
     """
     miner = await MinerService.get_miner_by_id(db, miner_id, farm_id)
-    
+
     if miner is None:
         raise NotFoundException("Miner", str(miner_id))
-    
+
     return MinerResponse.model_validate(miner)
 
 
 @router.get(
     "/miners/{miner_id}",
     response_model=MinerResponse,
-    summary="Get a miner by ID (direct access)",
+    summary="GET /api/v1/miners/{miner_id} - Get a miner by ID (direct access)",
     responses={
         200: {"description": "Miner details"},
         401: {"description": "Not authenticated"},
@@ -193,26 +193,26 @@ async def get_miner_direct(
 ) -> MinerResponse:
     """
     Get details of a specific miner by ID (without farm_id).
-    
+
     **Path Parameters:**
     - `miner_id` (UUID, required): Miner unique identifier.
-    
+
     **Response 200:** Miner details.
     **Response 401:** Not authenticated.
     **Response 404:** Miner not found.
     """
     miner = await MinerService.get_miner_by_id(db, miner_id)
-    
+
     if miner is None:
         raise NotFoundException("Miner", str(miner_id))
-    
+
     return MinerResponse.model_validate(miner)
 
 
 @router.put(
     "/farms/{farm_id}/miners/{miner_id}",
     response_model=MinerResponse,
-    summary="Full update of a miner",
+    summary="PUT /api/v1/farms/{farm_id}/miners/{miner_id} - Full update of a miner",
     responses={
         200: {"description": "Miner updated successfully"},
         401: {"description": "Not authenticated"},
@@ -231,11 +231,11 @@ async def update_miner(
 ) -> MinerResponse:
     """
     Full update of a miner (all fields required).
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
     - `miner_id` (UUID, required): Miner unique identifier.
-    
+
     **Request Body:**
     - `name` (str, required): Miner display name.
     - `model` (str, required): Hardware model.
@@ -243,7 +243,7 @@ async def update_miner(
     - `mac_address` (str, optional): Network MAC address.
     - `status` (str, required): Status.
     - `worker_name` (str, optional): Pool worker identifier.
-    
+
     **Response 200:** Miner updated successfully.
     **Response 401:** Not authenticated.
     **Response 403:** User does not have operator or admin role.
@@ -252,10 +252,10 @@ async def update_miner(
     **Response 422:** Request body validation failed.
     """
     miner = await MinerService.get_miner_by_id(db, miner_id, farm_id)
-    
+
     if miner is None:
         raise NotFoundException("Miner", str(miner_id))
-    
+
     # Check for duplicate IP (exclude current miner)
     if miner_data.ip_address and miner_data.ip_address != miner.ip_address:
         if await MinerService.check_ip_exists(
@@ -264,7 +264,7 @@ async def update_miner(
             raise ConflictException(
                 f"IP address '{miner_data.ip_address}' already exists in this farm"
             )
-    
+
     miner = await MinerService.update_miner(db, miner, miner_data)
     return MinerResponse.model_validate(miner)
 
@@ -272,7 +272,7 @@ async def update_miner(
 @router.patch(
     "/farms/{farm_id}/miners/{miner_id}",
     response_model=MinerResponse,
-    summary="Partial update of a miner",
+    summary="PATCH /api/v1/farms/{farm_id}/miners/{miner_id} - Partial update of a miner",
     responses={
         200: {"description": "Miner updated successfully"},
         401: {"description": "Not authenticated"},
@@ -290,11 +290,11 @@ async def patch_miner(
 ) -> MinerResponse:
     """
     Partial update of a miner (only provided fields are updated).
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
     - `miner_id` (UUID, required): Miner unique identifier.
-    
+
     **Request Body (all optional):**
     - `name` (str): Miner display name.
     - `model` (str): Hardware model.
@@ -302,7 +302,7 @@ async def patch_miner(
     - `mac_address` (str): Network MAC address.
     - `status` (str): Status.
     - `worker_name` (str): Pool worker identifier.
-    
+
     **Response 200:** Miner updated successfully.
     **Response 401:** Not authenticated.
     **Response 403:** User does not have operator or admin role.
@@ -310,10 +310,10 @@ async def patch_miner(
     **Response 422:** Request body validation failed.
     """
     miner = await MinerService.get_miner_by_id(db, miner_id, farm_id)
-    
+
     if miner is None:
         raise NotFoundException("Miner", str(miner_id))
-    
+
     miner = await MinerService.patch_miner(db, miner, miner_data)
     return MinerResponse.model_validate(miner)
 
@@ -321,7 +321,7 @@ async def patch_miner(
 @router.delete(
     "/farms/{farm_id}/miners/{miner_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a miner",
+    summary="DELETE /api/v1/farms/{farm_id}/miners/{miner_id} - Delete a miner",
     responses={
         204: {"description": "Miner deleted successfully"},
         401: {"description": "Not authenticated"},
@@ -337,19 +337,19 @@ async def delete_miner(
 ) -> None:
     """
     Delete a miner and all related data (metrics, alerts).
-    
+
     **Path Parameters:**
     - `farm_id` (UUID, required): Parent farm ID.
     - `miner_id` (UUID, required): Miner unique identifier.
-    
+
     **Response 204:** Miner deleted successfully.
     **Response 401:** Not authenticated.
     **Response 403:** User does not have admin role.
     **Response 404:** Farm or miner not found.
     """
     miner = await MinerService.get_miner_by_id(db, miner_id, farm_id)
-    
+
     if miner is None:
         raise NotFoundException("Miner", str(miner_id))
-    
+
     await MinerService.delete_miner(db, miner)

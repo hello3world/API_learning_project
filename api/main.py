@@ -112,7 +112,7 @@ app.include_router(websocket_router)  # WebSocket at root level
 @app.get(
     "/api/v1/health",
     tags=["Health"],
-    summary="Health check endpoint",
+    summary="GET /api/v1/health - Health check endpoint",
     responses={
         200: {"description": "API is healthy"},
     },
