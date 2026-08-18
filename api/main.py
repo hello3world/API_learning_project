@@ -17,7 +17,7 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from api.config import settings
 from api.database import close_db, init_db
@@ -36,16 +36,16 @@ from api.routers import (
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Application lifespan handler.
-    
+
     Initializes database on startup and closes connections on shutdown.
     """
     # Startup
     print("Starting Mining Farm Monitoring API...")
     await init_db()
     print("Database initialized.")
-    
+
     yield
-    
+
     # Shutdown
     print("Shutting down...")
     await close_db()
@@ -120,10 +120,10 @@ app.include_router(websocket_router)  # WebSocket at root level
 async def health_check() -> dict:
     """
     Health check endpoint.
-    
+
     Returns a simple status indicating the API is running.
     Use this endpoint for monitoring and load balancer health checks.
-    
+
     **Response 200:**
     ```json
     {
@@ -147,3 +147,39 @@ async def root() -> dict:
         "redoc": "/redoc",
         "health": "/api/v1/health",
     }
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html() -> HTMLResponse:
+    """
+    Custom Swagger UI with favicon.
+    """
+    return HTMLResponse(
+        """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mining Farm Monitoring API - Docs</title>
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css">
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
+        <script>
+        window.onload = function() {
+            window.ui = SwaggerUIBundle({
+                url: '/openapi.json',
+                dom_id: '#swagger-ui',
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+                layout: "BaseLayout"
+            });
+        };
+        </script>
+    </body>
+    </html>
+    """
+    )
