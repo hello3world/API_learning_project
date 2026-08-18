@@ -4,12 +4,12 @@ uvicorn[standard]==0.27.0
 python-multipart==0.0.6
 
 # Database
-sqlalchemy[asyncio]==2.0.23
-asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.40
+psycopg[binary]==3.2.3
 alembic==1.13.2
 
 # Authentication
-passlib[bcrypt]==1.7.4
+bcrypt==4.2.0
 pyjwt==2.9.0
 
 # Configuration

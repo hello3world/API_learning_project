@@ -2,6 +2,7 @@
 
 A learning project for practicing **httpx** API testing with FastAPI.
 
+
 ## Features
 
 - **REST API** with all HTTP methods (GET, POST, PUT, PATCH, DELETE)
@@ -16,19 +17,23 @@ A learning project for practicing **httpx** API testing with FastAPI.
 
 ### 1. Prerequisites
 
-- Python 3.11+
+- Python 3.13+ (recommended) or Python 3.11+
 - Docker & Docker Compose
 - Git
+
+**Note**: If you encounter dependency compilation errors with Python 3.13+, the project uses `psycopg` (pure Python PostgreSQL driver) instead of `asyncpg` to avoid C extension compilation issues.
 
 ### 2. Clone and Setup
 
 ```bash
 # Navigate to project directory
-cd f:\httpx_allure
+cd 
 
 # Create and activate virtual environment (if not exists)
 python -m venv .venv
-.venv\Scripts\activate  # Windows
+# .venv\Scripts\activate  # Windows
+
+python3 -m venv .venv
 # source .venv/bin/activate  # Linux/Mac
 
 # Install dependencies
@@ -44,6 +49,8 @@ docker compose up -d db
 # Verify it's running
 docker compose ps
 ```
+
+**Important**: The database is configured to run on port **5433** to avoid conflicts with local PostgreSQL installations. If you need to use the default port 5432, ensure no other PostgreSQL instance is running on your system.
 
 ### 4. Configure Environment
 
@@ -67,6 +74,7 @@ alembic upgrade head
 ```bash
 # Run with auto-reload for development
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+
 ```
 
 ### 7. Access the API
@@ -266,6 +274,12 @@ docker compose logs db
 
 # Restart container
 docker compose restart db
+
+# If you see "password authentication failed" or "connection refused":
+# 1. Ensure Docker PostgreSQL is running on port 5433
+# 2. Check that no local PostgreSQL is running on port 5432
+lsof -i :5432
+lsof -i :5433
 ```
 
 ### Migration Issues
@@ -283,7 +297,12 @@ alembic upgrade head
 
 ### Port Already in Use
 ```bash
-# Change port in uvicorn command
+# If port 8000 is in use, change port in uvicorn command
 uvicorn api.main:app --reload --port 8001
+
+# If port 5433 (PostgreSQL) is in use, check what's using it:
+lsof -i :5433
+# Then either stop that service or change the port in docker-compose.yml
+# and update DATABASE_URL in api/config.py accordingly
 ```
 # API_learning_project

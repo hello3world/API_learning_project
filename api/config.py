@@ -12,7 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """
     Application settings loaded from environment variables.
-    
+
     Attributes:
         DATABASE_URL: PostgreSQL async connection string.
         SECRET_KEY: Secret key for JWT token signing. MUST be changed in production.
@@ -22,24 +22,25 @@ class Settings(BaseSettings):
         CORS_ORIGINS: List of allowed CORS origins.
         DEBUG: Enable debug mode (SQLAlchemy echo, etc.).
     """
-    
+
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://mining_user:mining_password@localhost:5432/mining_farm"
-    
+    DATABASE_URL: str = "postgresql+psycopg://mining_user:mining_password@localhost:5433/mining_farm"
+
     # JWT Configuration
     SECRET_KEY: str = "your-super-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    
+
     # Cookie Configuration
     COOKIE_NAME: str = "access_token"
-    
+
     # CORS Configuration
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
-    
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000", "http://localhost:8000"]
+
     # Application
     DEBUG: bool = False
-    
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
