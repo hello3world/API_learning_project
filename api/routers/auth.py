@@ -215,34 +215,63 @@ async def update_me(
 
 
 @router.delete(
-    "/me",
+    "/users/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete current user account",
+    summary="Delete user by ID",
     responses={
-        204: {"description": "Account deleted successfully"},
+        204: {"description": "User deleted successfully"},
         401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized to delete this user"},
+        404: {"description": "User not found"},
     },
 )
-async def delete_me(
+async def delete_user(
+    user_id: str,
     current_user: CurrentUser,
     db: DbSession,
     response: Response,
 ) -> None:
     """
-    Delete the current user's account permanently.
-
-    **Response 204:** Account deleted successfully (no content).
+    Delete a user by their ID.
+    
+    **Path Parameters:**
+    - `user_id` (str): The UUID of the user to delete.
+    
+    **Response 204:** User deleted successfully (no content).
     **Response 401:** Not authenticated (no valid cookie).
-
-    This action cannot be undone. All user data will be permanently removed.
-    The JWT cookie will also be cleared.
+    **Response 403:** Not authorized (can only delete own account or must be admin).
+    **Response 404:** User not found.
+    
+    Users can delete their own accounts. Only admins can delete other users' accounts.
+    If deleting own account, the JWT cookie will also be cleared.
     """
-    await AuthService.delete_user(db, current_user)
-
-    # Clear the JWT cookie
-    response.delete_cookie(
-        key=settings.COOKIE_NAME,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-    )
+    from uuid import UUID
+    
+    # Convert user_id to UUID
+    try:
+        user_uuid = UUID(user_id)
+    except ValueError:
+        raise BadRequestException("Invalid user ID format")
+    
+    # Get the user to delete
+    user_to_delete = await AuthService.get_user_by_id(db, user_uuid)
+    if not user_to_delete:
+        from api.exceptions import NotFoundException
+        raise NotFoundException(f"User with ID '{user_id}' not found")
+    
+    # Check authorization: users can delete themselves, admins can delete anyone
+    from api.models.user import UserRole
+    if current_user.id != user_uuid and current_user.role != UserRole.ADMIN:
+        from api.exceptions import ForbiddenException
+        raise ForbiddenException("You can only delete your own account")
+    
+    await AuthService.delete_user(db, user_to_delete)
+    
+    # If deleting own account, clear the JWT cookie
+    if current_user.id == user_uuid:
+        response.delete_cookie(
+            key=settings.COOKIE_NAME,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+        )

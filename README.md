@@ -117,7 +117,7 @@ pytest api/tests/test_auth.py -v
 | POST | /api/v1/auth/logout | Logout (clears cookie) |
 | GET | /api/v1/auth/me | Get current user |
 | PATCH | /api/v1/auth/me | Update current user |
-| DELETE | /api/v1/auth/me | Delete current user account |
+| DELETE | /api/v1/auth/users/{id} | Delete user by ID |
 
 ### Mining Farms
 | Method | Endpoint | Description |
